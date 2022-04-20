@@ -35,9 +35,8 @@ categories: [Database]
 
 #### 외부 사례
 
-- https://www.reddit.com/r/jira/comments/48tnfy/how_does_ranking_an_issue_in_jira_software_work/
-
-- https://www.figma.com/blog/realtime-editing-of-ordered-sequences/
+- [Jira의 사례](https://www.reddit.com/r/jira/comments/48tnfy/how_does_ranking_an_issue_in_jira_software_work/)
+- [Figma의 사례](https://www.figma.com/blog/realtime-editing-of-ordered-sequences/)
 
 Jira, Figma 두 회사는 앞에서 언급한 문제들을 해결하기 위해 정렬키를 문자열의 사전식 정렬을 사용해 해결하였습니다. Jira는 알파벳, Figma는 임의정밀도 소수를 사용한 것에 차이가 있습니다. 
 
@@ -86,6 +85,4 @@ Jira, Figma 두 회사는 앞에서 언급한 문제들을 해결하기 위해 �
 
 ## 프로젝트
 
-2022년 1월 21일 완료, [pub.dev](https://pub.dev/) 출시
-
-https://pub.dev/packages/lexicographical_order
+2022년 1월 21일 완료, [pub.dev 출시](https://pub.dev/packages/lexicographical_order)
