@@ -4,6 +4,17 @@ title: 빈번하게 재정렬되는 데이터의 영속성
 categories: [Database]
 ---
 
+
+
+Notion, Clickup 등 실시간 협업문서편집 기능이 있는 서비스같은 생산성 서비스들은 사용자들이 특정 컴포넌트들을 재정렬하는 기능을 필수적으로 제공한다. 이번 게시글에서는 해당 기능 구현시 발생할수 있는 문제점과 해결방법에 대해 다룬다. 
+
+이미 어떤 문제가 발생하는지를 알고있거나 바로 해결책을 원한다면 해당 링크의 오픈소스 패키지를 이용하면 된다.
+
+- [pub.dev](https://pub.dev/packages/lexicographical_order)
+- [Github](https://github.com/sylfreee/lexicographical_order)
+
+
+
 ## 문제
 
 ![](../assets/reorderable_list.png)
@@ -21,7 +32,7 @@ categories: [Database]
    Grape    |    4
    ```
 
-   이 경우 n과 n+1 사이에 정수가 없다. 따라서 n+1이상의 정수 키 값을 가진 데이터들은 모두 업데이트가 되므로 최악의 경우 O(n)의 업데이트가 발생한다.
+   이 경우 n과 n+1 사이에 정수가 없다. 따라서 n+1이상의 정수 키 값을 가진 데이터들은 모두 업데이트가 필요하므로 최악의 경우 O(n)의 업데이트가 발생한다. 특히 정렬 키의 경우 `orderBy` 키워드에 사용되므로 인덱스가 필수적인데 이럴 경우 성능에 상당한 문제가 발생할 수 밖에 없다.
 
 2. 리스트로 저장할 경우
 
@@ -85,4 +96,138 @@ Jira, Figma 두 회사는 앞에서 언급한 문제들을 해결하기 위해 �
 
 ## 프로젝트
 
-2022년 1월 21일 완료, [pub.dev 출시](https://pub.dev/packages/lexicographical_order)
+해당 프로젝트는 DB에 저장되는 정렬 키들을 발생시켜주는 함수를 만드는 것이다. 호환성과 유지보수를 위해 알파벳으로만 구성된 문자열만 허용한다.
+
+- `between(prev: String?, next: String?) -> String`
+
+  두 개의 키 `prev`, `next`가 주어질 경우 사전식정렬상 `prev`와 `next`의 사전식정렬상 중앙값을 구해 리턴한다. 
+
+  - **테스트 케이스**
+
+    - [x] 1. 기본
+
+      두 개의 키 `ABCdE`와 `ABChi`가 주어졌다. 해당 키들의 중앙값은 먼저 `ABC`문자열을 선행하는 값으로 갖고있다. 그 다음 문자는 `d`와 `h` 의 중앙값을 갖는데 이는 `f`이다. 따라서 최종 문자열은 `ABCf` 이다.
+
+      `ABC` ,`ABCgi`의 경우 서로 문자열 길이가 다른데 먼저 선행하는 `ABC`는 앞과 동일하다. 그리고 `A`와 `g`의 중아값을 구해서 붙이면 `ABCQ`이다. 비어있는 문자와의 중앙값은 사전식 정렬상 맨 처음문자 `A`와 맨 끝 문자 `z`를 활용한다.
+
+      `between(prev: 'ABCdE', next: 'ABChi') == 'ABCf'`
+
+      `between(prev: 'ABC', next: 'ABCgi') == 'ABCQ'`
+
+    - [x] 2. 중앙값을 구하는 문자사이에 공간이 없는 경우
+
+      두 키 `ABHe`, `ABIn` 를보면 `H`와 `I` 사이의 문자를 구해야하는데 없다. 해당 부분은 스킵하고 결과 문자열에 `ABH`를 선행시킨다. 그리고 `e`와 `z`의 값의 중앙값인 `p`를 사용해 `ABHp`를 리턴한다. 
+
+      이럴경우 `ABHz`, `ABIn`의 경우가 문제가 되는데 `H`와 `z`를 스킵해서 결과 문자열에 `ABHz`을 선행시키고 `A`와 `z`의 중앙값인 `a`를 사용하여 `ABHza`를 결과값으로 사용한다.
+
+      `between(prev: 'ABHe', next: 'ABIn') == 'ABHp'`
+
+      `between(prev: 'ABHz', next: 'ABIn') == 'ABHza'`
+
+    - [x] 3. `mid = between(prev: prev, next: next)` 에서 인자 `next == 'A' or next == 'B' `일 경우 
+
+      두 개의 키 `ABC`,  `ABCAB` 가 주어졌을 경우 ABCA, ABCAA를 생각해볼 수 있는데 해당 문자열들은 좋지 않다. 사전식 정렬상 `ABC`와 `ABCA`의 사이에 존재하는 문자열이 없기 때문에 가능한 한 적은 공간을 사용하도록 하는 알고리즘 전략에 맞지 않다.`ABCAA`도 비슷한 원리로 좋지않다. 이럴 경우 `A`와 `z`의 중앙값을 사용해 `ABCAAa`를 결과값으로 사용한다.
+
+      `between(prev: 'ABC', next: 'ABCAH') == 'ABCAD'`
+
+      `between(prev: 'ABC', next: 'ABCAB') == 'ABCAAa'` <== worst-case
+
+      `between(prev: 'ABC', next: 'ABCAAh') == 'ABCAAQ'`
+
+      `between(prev: 'ABC', next: 'ABCB') == 'ABCAa'`
+
+      `between(prev: 'ABHe', next: 'ABIn') == 'ABHp'`
+
+    - [x] 4. Error
+
+      - [x] `prev`와 `next`는 서로 같으면 안된다
+      - [x] `prev`와 `next`는 비어있는 문자열이면 안된다.
+      - [x] `prev`와 `next`는 알파벳으로만 이루어져 있어야한다.
+      - [x] `prev`와 `next`를 사전식 정렬상 앞서면 안된다. 예) `prev == 'C', next == 'B'`
+      - [x] `next`는 `'A'`면 안된다. `'A'` 앞에 올 수 있는 문자열이 없다.
+
+  - **알고리즘 의사코드**
+
+    ```python
+    // 허용문자들과 해당 문자가 허용 문자들 중의 몇 번째인지 저장한다.
+    keyToIndex = {'A': 0, 'B': 1, 'C': 2, ..., 'z': 51}
+    keys = keyToIndex.keys()
+    
+    between(prev: String?, next: String?) -> String {
+        checkArgs(prev, next);
+        
+        p: int;
+        n: int;
+        g: int = 0;
+        result: String = '';
+    
+        # 선행하는 같은 부분문자열은 스킵한다.
+        # 예를 들어 'ABC', 'ABChi'가 주어졌을 경우 선행하는 'ABC'가 같다 따라서 g를 `C`뒤인 3으로 셋팅한다.
+        while g == 0 or p == n {
+            p = g < prev.length ? keyToIndex[prev[g]] : -1;
+            n = g < next.length ? keyToIndex[next[g]] : keyToIndex.length;
+            result += prev[g] # 같은 부분은 result에 넣는다.
+            g += 1;        
+        }
+        
+        # prev가 next의 선행하는 부분 문자열과 같다, 예를 들어 'ABC', 'ABChi'
+        if p == -1 {
+        	# next[g] == 'A'일 경우
+            while n == 0
+                n = g < next.length ? keyToIndex[next[g]] : keyToIndex.length;
+            	result += keys.first
+                g += 1
+            
+            if (n == 1) {
+                result += keys.first;
+                n = keyToIndex.length;
+            }
+        }
+        # 중앙값을 구하는 문자사이에 공간이 없는 경우
+        else if p == n - 1 {
+            result += keys[p]
+            n = keyToIndex.length;
+            p = g < prev.length ? keyToIndex[prev[g]] : -1;
+            while p == keyToIndex.length-1 { # prev == 'z'
+                result = keys.last;
+                g += 1;
+                p = g < prev.length ? keyToIndex[prev[g]] : -1;
+            }        
+        }
+        
+        median = ((p+n)/2).ceil()
+        result += keys[median]
+        return result   
+    }   
+    ```
+
+  - Worst-case Time Complexitiy: `O(max(prev.length, next.length) + 1)` 또는 그냥 `O(n)`
+
+- `generateOrderKeys(int orderKeyCount): Iterable<String>`
+
+  여러개의 새로운 정렬 키를 생성해준다. 현재 아무런 데이터가없어 `between`함수를 사용할 수 없을 때나 새로운 정렬 시스템으로 마이그레이션할 때 유용하다.
+
+- **두 키의 중앙값을 구하는 이유**
+
+  어떤 두 키 사이의 가능한한 많은 공간을 만들어 정렬 키들의 총 합계 사이즈가 적도록 하기 위함이다. 
+
+
+
+## 예외 사항
+
+`between`, `generateOrderKeys` 를 사용하지 않고 정렬 키를 생성한 경우 테이블이나 콜렉션 내 정렬상태가 깨질 수 있다. 직접 수정이 필요할 경우 주의해서 수정해야한다. 가능하면 해당 함수들을 사용해 값을 구한 뒤에 수정하는 것이 좋은 방법이다.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
