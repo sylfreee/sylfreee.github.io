@@ -6,9 +6,8 @@ categories: [Application]
 
 소개 Header
 
+<img title="" src="file:///C:/Users/must/Desktop/Projects/sylfreee.github.io/assets/sylfree-timer-alpha.webp" alt="sylfree-timer-alpha.webp" width="301">
 
 
 
-
-<img src="../assets/sylfree-timer-alpha-all.webp" alt="sylfree-timer-alpha-all" style="zoom:40%;" />
 
