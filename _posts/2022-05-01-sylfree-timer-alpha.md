@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Sylfree Timer 소개
+title: 집중도와 효율성을 높이는 시간관리 어플
 categories: [Application]
 ---
 
