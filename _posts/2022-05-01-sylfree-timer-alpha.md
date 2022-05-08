@@ -6,7 +6,7 @@ categories: [Application]
 
 소개 Header
 
-<img title="" src="../assets/sylfree-timer-alpha.webp" alt="sylfree-timer-alpha.webp" width="301">
+<img title="" src="../assets/sylfree-timer-alpha.gif">
 
 
 
