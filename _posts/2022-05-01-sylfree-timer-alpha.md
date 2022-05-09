@@ -55,8 +55,6 @@ categories: [Application, ]
 
 
 
-
-
-
+## 어플 소개 (Sylfree Timer)
 
 <img title="" src="../assets/sylfree-timer-alpha.gif">
