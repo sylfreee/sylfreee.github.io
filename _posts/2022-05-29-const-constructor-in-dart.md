@@ -1,6 +1,6 @@
 ---
 layout: post
-title: the const keyword in Dart
+title: The const keyword in Dart
 categories: [Application, ]
 ---
 
@@ -8,7 +8,7 @@ categories: [Application, ]
 
 Type ***const*** first when creating an object! 
 
-## A compile-time constant value
+# A compile-time constant value
 
 A compile-time constant value is computed at compile-time. 
 
@@ -16,7 +16,7 @@ When you start a Dart/Flutter application, the application is loaded into memory
 
 Dart/Flutter application gets a constant instance on the special cache like a hash map that stores objects by canonicalizing them.
 
-## Benefits
+# Benefits
 
 Even if you create a class multiple times with ***const*** keyword and the same arguments, only one instance is created.
 
@@ -74,7 +74,7 @@ class _MyWidgetState extends State<MyWidget> {
 }
 ```
 
-### References
+# References
 
 - ***[constant_reader.cc](https://github.com/dart-lang/sdk/blob/a24d875ff6aa7caf00bb4bbc11975cc206d9265b/runtime/vm/compiler/frontend/constant_reader.cc)***, in Dart SDK written in c++
 
