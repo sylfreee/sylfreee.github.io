@@ -1,7 +1,7 @@
 ---
 layout: post
-title: "const" keyword in Dart
-categories: [Dart]
+title: the const keyword in Dart
+categories: [Application, ]
 ---
 
 ***const*** keyword for constructors is for creating compile-time constant instances which helps Dart/Flutter application to be optimized.
